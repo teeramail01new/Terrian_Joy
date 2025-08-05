@@ -158,19 +158,18 @@ class TerrainJoyStockApp:
     
     def init_database_connection(self):
         """Initialize database connection with loading indicator"""
-        def connect_db():
-            if self.db.connect():
-                # Check if tables exist
-                tables_exist = self.check_database_tables()
-                if tables_exist:
-                    self.update_status("Connected to database", self.success_color)
-                else:
-                    self.update_status("Connected to database - Tables not found. Run database setup first.", self.warning_color)
-            else:
-                self.update_status("Failed to connect to database", self.error_color)
-        
         self.update_status("Connecting to database...", self.warning_color)
-        threading.Thread(target=connect_db, daemon=True).start()
+        
+        # Try to connect immediately
+        if self.db.connect():
+            # Check if tables exist
+            tables_exist = self.check_database_tables()
+            if tables_exist:
+                self.update_status("Connected to database", self.success_color)
+            else:
+                self.update_status("Connected to database - Tables not found. Run database setup first.", self.warning_color)
+        else:
+            self.update_status("Failed to connect to database", self.error_color)
     
     def check_database_tables(self):
         """Check if required tables exist in the database"""
@@ -193,7 +192,7 @@ class TerrainJoyStockApp:
         return ft.Container(
             content=ft.Row([
                 ft.Row([
-                    ft.Icon(ft.icons.INVENTORY, size=32, color=self.primary_color),
+                    ft.Icon(ft.Icons.INVENTORY, size=32, color=self.primary_color),
                     ft.Text(
                         "Terrain Joy",
                         size=24,
@@ -210,7 +209,7 @@ class TerrainJoyStockApp:
                 ft.Row([
                     ft.Container(
                         content=ft.Row([
-                            ft.Icon(ft.icons.PERSON, size=20, color=ft.Colors.WHITE),
+                            ft.Icon(ft.Icons.PERSON, size=20, color=ft.Colors.WHITE),
                             ft.Text("Administrator", color=ft.Colors.WHITE, size=14),
                         ], spacing=5),
                         bgcolor=self.primary_color,
@@ -218,12 +217,12 @@ class TerrainJoyStockApp:
                         border_radius=20,
                     ),
                     ft.IconButton(
-                        icon=ft.icons.SETTINGS,
+                        icon=ft.Icons.SETTINGS,
                         tooltip="Settings",
                         on_click=self.show_settings,
                     ),
                     ft.IconButton(
-                        icon=ft.icons.REFRESH,
+                        icon=ft.Icons.REFRESH,
                         tooltip="Refresh Data",
                         on_click=self.refresh_data,
                     ),
@@ -245,44 +244,44 @@ class TerrainJoyStockApp:
                 group_alignment=-0.9,
                 destinations=[
                     ft.NavigationRailDestination(
-                        icon_content=ft.Icon(ft.icons.DASHBOARD_OUTLINED),
-                        selected_icon_content=ft.Icon(ft.icons.DASHBOARD),
-                        label_content=ft.Text("Dashboard", size=14),
+                        icon=ft.Icons.DASHBOARD_OUTLINED,
+                        selected_icon=ft.Icons.DASHBOARD,
+                        label="Dashboard",
                     ),
                     ft.NavigationRailDestination(
-                        icon_content=ft.Icon(ft.icons.INVENTORY_OUTLINED),
-                        selected_icon_content=ft.Icon(ft.icons.INVENTORY),
-                        label_content=ft.Text("Products", size=14),
+                        icon=ft.Icons.INVENTORY_OUTLINED,
+                        selected_icon=ft.Icons.INVENTORY,
+                        label="Products",
                     ),
                     ft.NavigationRailDestination(
-                        icon_content=ft.Icon(ft.icons.WAREHOUSE_OUTLINED),
-                        selected_icon_content=ft.Icon(ft.icons.WAREHOUSE),
-                        label_content=ft.Text("Inventory", size=14),
+                        icon=ft.Icons.WAREHOUSE_OUTLINED,
+                        selected_icon=ft.Icons.WAREHOUSE,
+                        label="Inventory",
                     ),
                     ft.NavigationRailDestination(
-                        icon_content=ft.Icon(ft.icons.RECEIPT_LONG_OUTLINED),
-                        selected_icon_content=ft.Icon(ft.icons.RECEIPT_LONG),
-                        label_content=ft.Text("Stock Moves", size=14),
+                        icon=ft.Icons.RECEIPT_LONG_OUTLINED,
+                        selected_icon=ft.Icons.RECEIPT_LONG,
+                        label="Stock Moves",
                     ),
                     ft.NavigationRailDestination(
-                        icon_content=ft.Icon(ft.icons.SHOPPING_CART_OUTLINED),
-                        selected_icon_content=ft.Icon(ft.icons.SHOPPING_CART),
-                        label_content=ft.Text("Sales Orders", size=14),
+                        icon=ft.Icons.SHOPPING_CART_OUTLINED,
+                        selected_icon=ft.Icons.SHOPPING_CART,
+                        label="Sales Orders",
                     ),
                     ft.NavigationRailDestination(
-                        icon_content=ft.Icon(ft.icons.PEOPLE_OUTLINED),
-                        selected_icon_content=ft.Icon(ft.icons.PEOPLE),
-                        label_content=ft.Text("Customers", size=14),
+                        icon=ft.Icons.PEOPLE_OUTLINED,
+                        selected_icon=ft.Icons.PEOPLE,
+                        label="Customers",
                     ),
                     ft.NavigationRailDestination(
-                        icon_content=ft.Icon(ft.icons.PERSON_OUTLINED),
-                        selected_icon_content=ft.Icon(ft.icons.PERSON),
-                        label_content=ft.Text("Agents", size=14),
+                        icon=ft.Icons.PERSON_OUTLINED,
+                        selected_icon=ft.Icons.PERSON,
+                        label="Agents",
                     ),
                     ft.NavigationRailDestination(
-                        icon_content=ft.Icon(ft.icons.ANALYTICS_OUTLINED),
-                        selected_icon_content=ft.Icon(ft.icons.ANALYTICS),
-                        label_content=ft.Text("Reports", size=14),
+                        icon=ft.Icons.ANALYTICS_OUTLINED,
+                        selected_icon=ft.Icons.ANALYTICS,
+                        label="Reports",
                     ),
                 ],
                 on_change=self.nav_change,
@@ -318,7 +317,7 @@ class TerrainJoyStockApp:
         self.status_bar = ft.Container(
             content=ft.Row([
                 ft.Row([
-                    ft.Icon(ft.icons.CIRCLE, size=8, color=self.success_color),
+                    ft.Icon(ft.Icons.CIRCLE, size=8, color=self.success_color),
                     ft.Text("Ready", size=12, color=ft.Colors.GREY_600),
                 ], spacing=5),
                 
@@ -381,13 +380,15 @@ class TerrainJoyStockApp:
                     self.page.update()
                     
             except Exception as e:
+                print(f"Error loading content for {self.current_page}: {e}")
                 error_content = ft.Column([
-                    ft.Icon(ft.icons.ERROR, size=64, color=self.error_color),
+                    ft.Icon(ft.Icons.ERROR, size=64, color=self.error_color),
                     ft.Text("Error Loading Content", size=24, weight=ft.FontWeight.BOLD, color=self.error_color),
-                    ft.Text(str(e), size=14, color=ft.Colors.GREY_600),
+                    ft.Text(f"Error: {str(e)}", size=14, color=ft.Colors.GREY_600),
+                    ft.Text("Please check database connection and try again.", size=12, color=ft.Colors.GREY_500),
                     ft.ElevatedButton(
                         "Retry",
-                        icon=ft.icons.REFRESH,
+                        icon=ft.Icons.REFRESH,
                         on_click=lambda _: self.update_content(),
                         bgcolor=self.primary_color,
                         color=ft.Colors.WHITE,
@@ -456,6 +457,92 @@ class TerrainJoyStockApp:
             ),
         )
     
+    def create_data_table(self, data: List[Dict], columns: List[Dict], title: str = None):
+        """Create a data table with the given data and columns"""
+        if not data:
+            return ft.Container(
+                content=ft.Column([
+                    ft.Icon(ft.Icons.INFO_OUTLINE, size=48, color=ft.Colors.GREY_400),
+                    ft.Text("No data available", size=16, color=ft.Colors.GREY_600),
+                    ft.Text("Add some data to see it here", size=14, color=ft.Colors.GREY_500),
+                ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+                padding=40,
+                bgcolor=ft.Colors.WHITE,
+                border_radius=12,
+            )
+        
+        # Create table rows
+        table_rows = []
+        
+        # Header row
+        header_cells = []
+        for col in columns:
+            header_cells.append(
+                ft.DataCell(
+                    ft.Text(
+                        col['label'],
+                        weight=ft.FontWeight.BOLD,
+                        color=ft.Colors.GREY_700,
+                        size=14
+                    )
+                )
+            )
+        table_rows.append(ft.DataRow(cells=header_cells))
+        
+        # Data rows
+        for row_data in data:
+            cells = []
+            for col in columns:
+                value = row_data.get(col['field'], '')
+                if isinstance(value, (int, float)):
+                    value = str(value)
+                elif value is None:
+                    value = '-'
+                
+                # Truncate long values
+                if len(str(value)) > 30:
+                    value = str(value)[:27] + "..."
+                
+                cells.append(ft.DataCell(ft.Text(value, size=13)))
+            table_rows.append(ft.DataRow(cells=cells))
+        
+        return ft.Container(
+            content=ft.Column([
+                ft.Text(title or "Data", size=18, weight=ft.FontWeight.BOLD, color=self.primary_color),
+                ft.Divider(color=ft.Colors.GREY_300),
+                ft.DataTable(
+                    columns=len(columns),
+                    rows=table_rows,
+                    border=ft.border.all(1, ft.Colors.GREY_300),
+                    border_radius=8,
+                    column_spacing=20,
+                    heading_row_height=50,
+                    data_row_min_height=40,
+                    data_row_max_height=50,
+                    divider_thickness=1,
+                    horizontal_lines=ft.border.BorderSide(1, ft.Colors.GREY_200),
+                    heading_text_style=ft.TextStyle(
+                        size=14,
+                        weight=ft.FontWeight.BOLD,
+                        color=ft.Colors.GREY_700,
+                    ),
+                    data_text_style=ft.TextStyle(
+                        size=13,
+                        color=ft.Colors.GREY_800,
+                    ),
+                ),
+            ]),
+            padding=20,
+            bgcolor=ft.Colors.WHITE,
+            border_radius=12,
+            shadow=ft.BoxShadow(
+                spread_radius=0,
+                blur_radius=10,
+                color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK),
+                offset=ft.Offset(0, 4),
+            ),
+        )
+    
     # Content Methods for Different Pages
     def get_dashboard_content(self):
         """Dashboard content with overview statistics"""
@@ -466,28 +553,28 @@ class TerrainJoyStockApp:
             self.create_stat_card(
                 "Total Products", 
                 str(stats.get('total_products', 0)), 
-                ft.icons.INVENTORY, 
+                ft.Icons.INVENTORY, 
                 self.primary_color,
                 "Active items"
             ),
             self.create_stat_card(
                 "Low Stock Items", 
                 str(stats.get('low_stock', 0)), 
-                ft.icons.WARNING, 
+                ft.Icons.WARNING, 
                 self.error_color,
                 "Need reorder"
             ),
             self.create_stat_card(
                 "Total Customers", 
                 str(stats.get('total_customers', 0)), 
-                ft.icons.PEOPLE, 
+                ft.Icons.PEOPLE, 
                 self.success_color,
                 "Active accounts"
             ),
             self.create_stat_card(
                 "Active Agents", 
                 str(stats.get('total_agents', 0)), 
-                ft.icons.PERSON, 
+                ft.Icons.PERSON, 
                 self.accent_color,
                 "Sales team"
             ),
@@ -524,107 +611,145 @@ class TerrainJoyStockApp:
         ], scroll=ft.ScrollMode.AUTO)
     
     def get_products_content(self):
-        """Products management content"""
+        """Products management content with data grid"""
         add_button = ft.ElevatedButton(
             "Add Product",
-            icon=ft.icons.ADD,
+                            icon=ft.Icons.ADD,
             bgcolor=self.primary_color,
             color=ft.Colors.WHITE,
             on_click=self.show_add_product_dialog,
         )
         
+        # Get products data
+        products_data = self.get_products_data()
+        products_columns = [
+            {'field': 'sku', 'label': 'SKU'},
+            {'field': 'name', 'label': 'Product Name'},
+            {'field': 'category_name', 'label': 'Category'},
+            {'field': 'selling_price', 'label': 'Price'},
+            {'field': 'unit_of_measure', 'label': 'Unit'},
+            {'field': 'is_active', 'label': 'Status'},
+        ]
+        
         return ft.Column([
             self.create_page_header("Products", "Manage your product catalog", [add_button]),
-            ft.Container(
-                content=ft.Text("Product management interface will be loaded here.", size=16),
-                padding=20,
-                bgcolor=ft.Colors.WHITE,
-                border_radius=12,
-            ),
+            self.create_data_table(products_data, products_columns, "Products List"),
         ], scroll=ft.ScrollMode.AUTO)
     
     def get_inventory_content(self):
-        """Inventory management content"""
+        """Inventory management content with data grid"""
+        # Get inventory data
+        inventory_data = self.get_inventory_data()
+        inventory_columns = [
+            {'field': 'product_name', 'label': 'Product'},
+            {'field': 'warehouse_name', 'label': 'Warehouse'},
+            {'field': 'quantity_on_hand', 'label': 'On Hand'},
+            {'field': 'quantity_reserved', 'label': 'Reserved'},
+            {'field': 'available_qty', 'label': 'Available'},
+            {'field': 'last_updated', 'label': 'Last Updated'},
+        ]
+        
         return ft.Column([
             self.create_page_header("Inventory", "Monitor and manage stock levels"),
-            ft.Container(
-                content=ft.Text("Inventory management interface will be loaded here.", size=16),
-                padding=20,
-                bgcolor=ft.Colors.WHITE,
-                border_radius=12,
-            ),
+            self.create_data_table(inventory_data, inventory_columns, "Inventory Levels"),
         ], scroll=ft.ScrollMode.AUTO)
     
     def get_stock_moves_content(self):
-        """Stock movements content"""
+        """Stock movements content with data grid"""
+        # Get stock movements data
+        movements_data = self.get_stock_movements_data()
+        movements_columns = [
+            {'field': 'product_name', 'label': 'Product'},
+            {'field': 'warehouse_name', 'label': 'Warehouse'},
+            {'field': 'movement_type', 'label': 'Type'},
+            {'field': 'quantity', 'label': 'Quantity'},
+            {'field': 'reference_type', 'label': 'Reference'},
+            {'field': 'created_at', 'label': 'Date'},
+        ]
+        
         return ft.Column([
             self.create_page_header("Stock Movements", "Track all inventory transactions"),
-            ft.Container(
-                content=ft.Text("Stock movements history will be displayed here.", size=16),
-                padding=20,
-                bgcolor=ft.Colors.WHITE,
-                border_radius=12,
-            ),
+            self.create_data_table(movements_data, movements_columns, "Recent Stock Movements"),
         ], scroll=ft.ScrollMode.AUTO)
     
     def get_sales_content(self):
-        """Sales orders content"""
+        """Sales orders content with data grid"""
         add_order_button = ft.ElevatedButton(
             "New Order",
-            icon=ft.icons.ADD_SHOPPING_CART,
+                            icon=ft.Icons.ADD_SHOPPING_CART,
             bgcolor=self.success_color,
             color=ft.Colors.WHITE,
             on_click=self.show_add_order_dialog,
         )
         
+        # Get sales orders data
+        sales_data = self.get_sales_orders_data()
+        sales_columns = [
+            {'field': 'order_number', 'label': 'Order #'},
+            {'field': 'customer_name', 'label': 'Customer'},
+            {'field': 'agent_name', 'label': 'Agent'},
+            {'field': 'order_date', 'label': 'Order Date'},
+            {'field': 'status', 'label': 'Status'},
+            {'field': 'total_amount', 'label': 'Total'},
+        ]
+        
         return ft.Column([
             self.create_page_header("Sales Orders", "Manage customer orders", [add_order_button]),
-            ft.Container(
-                content=ft.Text("Sales orders management interface will be loaded here.", size=16),
-                padding=20,
-                bgcolor=ft.Colors.WHITE,
-                border_radius=12,
-            ),
+            self.create_data_table(sales_data, sales_columns, "Sales Orders"),
         ], scroll=ft.ScrollMode.AUTO)
     
     def get_customers_content(self):
-        """Customers management content"""
+        """Customers management content with data grid"""
         add_customer_button = ft.ElevatedButton(
             "Add Customer",
-            icon=ft.icons.PERSON_ADD,
+            icon=ft.Icons.PERSON_ADD,
             bgcolor=self.primary_color,
             color=ft.Colors.WHITE,
             on_click=self.show_add_customer_dialog,
         )
         
+        # Get customers data
+        customers_data = self.get_customers_data()
+        customers_columns = [
+            {'field': 'customer_code', 'label': 'Code'},
+            {'field': 'company_name', 'label': 'Company'},
+            {'field': 'contact_person', 'label': 'Contact'},
+            {'field': 'email', 'label': 'Email'},
+            {'field': 'phone', 'label': 'Phone'},
+            {'field': 'customer_type', 'label': 'Type'},
+            {'field': 'is_active', 'label': 'Status'},
+        ]
+        
         return ft.Column([
             self.create_page_header("Customers", "Manage customer relationships", [add_customer_button]),
-            ft.Container(
-                content=ft.Text("Customer management interface will be loaded here.", size=16),
-                padding=20,
-                bgcolor=ft.Colors.WHITE,
-                border_radius=12,
-            ),
+            self.create_data_table(customers_data, customers_columns, "Customers List"),
         ], scroll=ft.ScrollMode.AUTO)
     
     def get_agents_content(self):
-        """Agents management content"""
+        """Agents management content with data grid"""
         add_agent_button = ft.ElevatedButton(
             "Add Agent",
-            icon=ft.icons.PERSON_ADD,
+            icon=ft.Icons.PERSON_ADD,
             bgcolor=self.accent_color,
             color=ft.Colors.WHITE,
             on_click=self.show_add_agent_dialog,
         )
         
+        # Get agents data
+        agents_data = self.get_agents_data()
+        agents_columns = [
+            {'field': 'agent_code', 'label': 'Code'},
+            {'field': 'full_name', 'label': 'Name'},
+            {'field': 'email', 'label': 'Email'},
+            {'field': 'phone', 'label': 'Phone'},
+            {'field': 'territory', 'label': 'Territory'},
+            {'field': 'commission_rate', 'label': 'Commission %'},
+            {'field': 'status', 'label': 'Status'},
+        ]
+        
         return ft.Column([
             self.create_page_header("Agents", "Manage sales team", [add_agent_button]),
-            ft.Container(
-                content=ft.Text("Agent management interface will be loaded here.", size=16),
-                padding=20,
-                bgcolor=ft.Colors.WHITE,
-                border_radius=12,
-            ),
+            self.create_data_table(agents_data, agents_columns, "Sales Agents"),
         ], scroll=ft.ScrollMode.AUTO)
     
     def get_reports_content(self):
@@ -639,7 +764,142 @@ class TerrainJoyStockApp:
             ),
         ], scroll=ft.ScrollMode.AUTO)
     
-    # Database Methods
+    # Database Methods for Data Retrieval
+    def get_products_data(self):
+        """Get products data for the data grid"""
+        try:
+            query = """
+                SELECT 
+                    p.sku,
+                    p.name,
+                    c.name as category_name,
+                    p.selling_price,
+                    p.unit_of_measure,
+                    CASE WHEN p.is_active THEN 'Active' ELSE 'Inactive' END as is_active
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                ORDER BY p.name
+                LIMIT 50
+            """
+            result = self.db.execute_query(query)
+            return result if result is not None else []
+        except Exception as e:
+            print(f"Error getting products data: {e}")
+            return []
+    
+    def get_inventory_data(self):
+        """Get inventory data for the data grid"""
+        try:
+            query = """
+                SELECT 
+                    p.name as product_name,
+                    w.name as warehouse_name,
+                    i.quantity_on_hand,
+                    i.quantity_reserved,
+                    (i.quantity_on_hand - i.quantity_reserved) as available_qty,
+                    i.last_updated
+                FROM inventory i
+                JOIN products p ON i.product_id = p.id
+                JOIN warehouses w ON i.warehouse_id = w.id
+                ORDER BY p.name, w.name
+                LIMIT 50
+            """
+            result = self.db.execute_query(query)
+            return result if result is not None else []
+        except Exception as e:
+            print(f"Error getting inventory data: {e}")
+            return []
+    
+    def get_stock_movements_data(self):
+        """Get stock movements data for the data grid"""
+        try:
+            query = """
+                SELECT 
+                    p.name as product_name,
+                    w.name as warehouse_name,
+                    sm.movement_type,
+                    sm.quantity,
+                    sm.reference_type,
+                    sm.created_at
+                FROM stock_movements sm
+                JOIN products p ON sm.product_id = p.id
+                JOIN warehouses w ON sm.warehouse_id = w.id
+                ORDER BY sm.created_at DESC
+                LIMIT 50
+            """
+            result = self.db.execute_query(query)
+            return result if result is not None else []
+        except Exception as e:
+            print(f"Error getting stock movements data: {e}")
+            return []
+    
+    def get_sales_orders_data(self):
+        """Get sales orders data for the data grid"""
+        try:
+            query = """
+                SELECT 
+                    so.order_number,
+                    c.company_name as customer_name,
+                    CONCAT(a.first_name, ' ', a.last_name) as agent_name,
+                    so.order_date,
+                    so.status,
+                    so.total_amount
+                FROM sales_orders so
+                LEFT JOIN customers c ON so.customer_id = c.id
+                LEFT JOIN agents a ON so.agent_id = a.id
+                ORDER BY so.order_date DESC
+                LIMIT 50
+            """
+            result = self.db.execute_query(query)
+            return result if result is not None else []
+        except Exception as e:
+            print(f"Error getting sales orders data: {e}")
+            return []
+    
+    def get_customers_data(self):
+        """Get customers data for the data grid"""
+        try:
+            query = """
+                SELECT 
+                    customer_code,
+                    company_name,
+                    contact_person,
+                    email,
+                    phone,
+                    customer_type,
+                    CASE WHEN is_active THEN 'Active' ELSE 'Inactive' END as is_active
+                FROM customers
+                ORDER BY company_name
+                LIMIT 50
+            """
+            result = self.db.execute_query(query)
+            return result if result is not None else []
+        except Exception as e:
+            print(f"Error getting customers data: {e}")
+            return []
+    
+    def get_agents_data(self):
+        """Get agents data for the data grid"""
+        try:
+            query = """
+                SELECT 
+                    agent_code,
+                    CONCAT(first_name, ' ', last_name) as full_name,
+                    email,
+                    phone,
+                    territory,
+                    commission_rate,
+                    status
+                FROM agents
+                ORDER BY first_name, last_name
+                LIMIT 50
+            """
+            result = self.db.execute_query(query)
+            return result if result is not None else []
+        except Exception as e:
+            print(f"Error getting agents data: {e}")
+            return []
+    
     def get_dashboard_stats(self):
         """Get dashboard statistics"""
         stats = {
@@ -650,6 +910,7 @@ class TerrainJoyStockApp:
         }
         
         if not self.db.is_connected:
+            print("Database not connected, returning default stats")
             return stats
         
         try:
@@ -663,15 +924,17 @@ class TerrainJoyStockApp:
             for table_name, query in table_checks:
                 try:
                     result = self.db.execute_query(query)
-                    if result:
+                    if result and len(result) > 0:
                         if table_name == "products":
                             stats['total_products'] = result[0]['count']
                         elif table_name == "customers":
                             stats['total_customers'] = result[0]['count']
                         elif table_name == "agents":
                             stats['total_agents'] = result[0]['count']
+                    else:
+                        print(f"No results for {table_name} query")
                 except Exception as e:
-                    print(f"Table {table_name} may not exist yet: {e}")
+                    print(f"Error querying {table_name} table: {e}")
                     continue
             
             # Low stock items (placeholder for now)
